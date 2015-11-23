@@ -22,5 +22,5 @@
         android:layout_height="wrap_content"
         android:textSize="46sp"
         android:text="Submit"
-        android:onClick=""/>
+        android:onClick="btn_submit"/>
 </LinearLayout>
