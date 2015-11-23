@@ -3,9 +3,8 @@ package com.homework.norman.nobelprize;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.TextUtils;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -25,8 +24,9 @@ public class YearSelectActivity extends AppCompatActivity {
     public void btn_submit(View view){
         Log.d(TAG, "Btn clicked");
         final EditText select_year_view = (EditText) findViewById(R.id.edit_text_year);
-        String select_year = select_year_view.getText().toString();
-        if(select_year == null || TextUtils.isEmpty(select_year)){
+//        String select_year = select_year_view.getText();
+        int select_year = Integer.parseInt(String.valueOf(select_year_view.getText()));
+        if(select_year <= 0){
             new AlertDialog.Builder(this)
                     .setTitle("沒有輸入年")
                     .setMessage("請輸入年")
