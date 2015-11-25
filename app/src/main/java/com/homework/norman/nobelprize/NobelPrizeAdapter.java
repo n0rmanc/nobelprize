@@ -3,7 +3,6 @@ package com.homework.norman.nobelprize;
 import android.app.Activity;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,7 +66,7 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
 
 
         for(int year = currentYear - finalYearCount + 1; year <= currentYear; year++){
-            Log.d(TAG, "year: " + year);
+            // Log.d(TAG, "year: " + year);
             Ion.with(mContext)
                     .load(mUrl + year)
                     .asJsonObject()
@@ -79,10 +78,10 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
                                 NobelPrizeYearInfo nobelPrizeYearInfo = new NobelPrizeYearInfo();
                                 JsonArray prizes = result.getAsJsonArray("prizes");
                                 if( prizes != null){
-                                    Log.d(TAG, "prizes size " + prizes.size());
+                                    // Log.d(TAG, "prizes size " + prizes.size());
                                     if(prizes.size() > 0){
                                         int year = prizes.get(0).getAsJsonObject().get("year").getAsInt();
-                                        Log.d(TAG, "year " + year);
+                                        // Log.d(TAG, "year " + year);
 
                                         StringBuilder name = new StringBuilder();
 
@@ -92,7 +91,7 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
                                             NobelPrizeInfo nobelPrizeInfo = new NobelPrizeInfo();
 
                                             String category = element.getAsJsonObject().get("category").getAsString();
-                                            Log.d(TAG, "CAtegory " + category);
+                                            // Log.d(TAG, "CAtegory " + category);
                                             nobelPrizeInfo.category = category;
                                             JsonArray laureates = (JsonArray) element.getAsJsonObject().get("laureates");
                                             for (JsonElement laureate : laureates) {
@@ -113,7 +112,7 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
                                                     name.append(" ");
                                                     name.append(surname);
                                                 }
-                                                Log.d(TAG, "name " + name);
+                                                // Log.d(TAG, "name " + name);
                                                 nobelPrizeInfo.award_winers.add(name.toString());
                                                 name.setLength(0);
                                             }
@@ -129,9 +128,9 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
 
                                 }
 
-                                Log.d(TAG, "mCountPrizeInfos " + mCountPrizeInfos);
+                                // Log.d(TAG, "mCountPrizeInfos " + mCountPrizeInfos);
                                 if(++mCountPrizeInfos == finalYearCount){
-                                    //Log.d(TAG, "notifyDataSetChanged Count " + mNobelPrizeYearInfos.size());
+                                    // Log.d(TAG, "notifyDataSetChanged Count " + mNobelPrizeYearInfos.size());
                                     // Sort year informations
                                     Collections.sort(mNobelPrizeYearInfos, new Comparator<NobelPrizeYearInfo>() {
                                         @Override
@@ -190,7 +189,7 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
         View view = convertView;
         NobelPrizeYearInfo nobelPrizeYearInfo = getItem(position);
         if(view == null){
-            //Log.d(TAG, "View null ");
+            // Log.d(TAG, "View null ");
             LayoutInflater inflater = mContext.getLayoutInflater();
             view = inflater.inflate(R.layout.nobel_prize_list_item, null);
             ViewHolder viewHolder = new ViewHolder();
@@ -214,7 +213,7 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
             htmlString.append(nobelPrizeInfo.category);
             htmlString.append("</div>");
             for(String awardWiner: nobelPrizeInfo.award_winers){
-                //Log.d(TAG, "award_winers " + awardWiner);
+                // Log.d(TAG, "award_winers " + awardWiner);
                 htmlString.append("&#8226;  ");
                 htmlString.append(awardWiner);
                 htmlString.append("<br/>");
