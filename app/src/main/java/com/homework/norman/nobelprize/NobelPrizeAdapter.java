@@ -32,8 +32,6 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
 
     private final String mUrl = "http://api.nobelprize.org/v1/prize.json?year=";
 
-    private int mMaxCategoryCount = 1;
-
     int mCountPrizeInfos = 0;
 
     final int BATCH_SIZE = 18;
@@ -119,9 +117,7 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
                                             nobelPrizeYearInfo.prize_info.add(nobelPrizeInfo);
                                             laureates = null;
                                         }
-                                        if(mMaxCategoryCount < nobelPrizeYearInfo.prize_info.size()){
-                                            mMaxCategoryCount = nobelPrizeYearInfo.prize_info.size();
-                                        }
+                                        
                                         mNobelPrizeYearInfos.add(nobelPrizeYearInfo);
                                         name = null;
                                     }
