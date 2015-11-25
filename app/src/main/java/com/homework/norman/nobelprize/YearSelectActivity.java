@@ -12,7 +12,7 @@ import android.widget.EditText;
 public class YearSelectActivity extends AppCompatActivity {
 
     public final static String MESSAGE_SELECT_YEAR = "com.homework.norman.nobelprize.select_year";
-
+    public final static int FIRST_NOBEL_PRIZE_YEAR = 1902;
     private final static String TAG = "YearSelectActivity";
 
     @Override

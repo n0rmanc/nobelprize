@@ -3,6 +3,7 @@ package com.homework.norman.nobelprize;
 import android.app.Activity;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,18 +37,37 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
 
     int mCountPrizeInfos = 0;
 
+    final int BATCH_SIZE = 18;
+    int mRemainYearCount = 0;
+    int mProcessedYearCount = 0;
+    int mCurrentYear = 0;
+
+
     public NobelPrizeAdapter(Activity context, int years) {
         super(context, R.layout.nobel_prize_list_item);
         mNobelPrizeYearInfos = new ArrayList<NobelPrizeYearInfo>();
         mContext = context;
-        getNobelPrizeYearInfos(years);
+        Calendar calendar = Calendar.getInstance();
+        mCurrentYear = calendar.get(Calendar.YEAR);
+
+        int maxYearCount = mCurrentYear - YearSelectActivity.FIRST_NOBEL_PRIZE_YEAR - 1;
+        getNobelPrizeYearInfos(years > maxYearCount ? maxYearCount : years);
+
     }
 
-    private void getNobelPrizeYearInfos(final int yearCount){
-        Calendar calendar = Calendar.getInstance();
-        int current_year = calendar.get(Calendar.YEAR);
+    private void getNobelPrizeYearInfos(int yearCount){
 
-        for(int year = current_year - yearCount + 1 ; year <= current_year; year++){
+        int currentYear = mCurrentYear - mProcessedYearCount;
+
+
+        final int finalYearCount = yearCount > BATCH_SIZE ? BATCH_SIZE : yearCount;
+
+        mProcessedYearCount = mProcessedYearCount + finalYearCount;
+        mRemainYearCount = yearCount - finalYearCount;
+
+
+        for(int year = currentYear - finalYearCount + 1; year <= currentYear; year++){
+            Log.d(TAG, "year: " + year);
             Ion.with(mContext)
                     .load(mUrl + year)
                     .asJsonObject()
@@ -58,51 +78,59 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
 
                                 NobelPrizeYearInfo nobelPrizeYearInfo = new NobelPrizeYearInfo();
                                 JsonArray prizes = result.getAsJsonArray("prizes");
-                                int year = prizes.get(0).getAsJsonObject().get("year").getAsInt();
-                                //Log.d(TAG, "year " + year);
+                                if( prizes != null){
+                                    Log.d(TAG, "prizes size " + prizes.size());
+                                    if(prizes.size() > 0){
+                                        int year = prizes.get(0).getAsJsonObject().get("year").getAsInt();
+                                        Log.d(TAG, "year " + year);
 
-                                StringBuilder name = new StringBuilder();
+                                        StringBuilder name = new StringBuilder();
 
-                                nobelPrizeYearInfo.year = year;
-                                for (JsonElement element : prizes) {
-                                    //get category
-                                    NobelPrizeInfo nobelPrizeInfo = new NobelPrizeInfo();
+                                        nobelPrizeYearInfo.year = year;
+                                        for (JsonElement element : prizes) {
+                                            //get category
+                                            NobelPrizeInfo nobelPrizeInfo = new NobelPrizeInfo();
 
-                                    String category = element.getAsJsonObject().get("category").getAsString();
-                                    //Log.d(TAG, "CAtegory " + category);
-                                    nobelPrizeInfo.category = category;
-                                    JsonArray laureates = (JsonArray) element.getAsJsonObject().get("laureates");
-                                    for (JsonElement laureate : laureates) {
-                                        JsonObject laureate_object = (JsonObject) laureate;
-                                        String firstname = "";
-                                        if (laureate_object.get("firstname") != null){
-                                            firstname = ((JsonObject) laureate).get("firstname").getAsString();
-                                        }
+                                            String category = element.getAsJsonObject().get("category").getAsString();
+                                            Log.d(TAG, "CAtegory " + category);
+                                            nobelPrizeInfo.category = category;
+                                            JsonArray laureates = (JsonArray) element.getAsJsonObject().get("laureates");
+                                            for (JsonElement laureate : laureates) {
+                                                JsonObject laureate_object = (JsonObject) laureate;
+                                                String firstname = "";
+                                                if (laureate_object.get("firstname") != null){
+                                                    firstname = ((JsonObject) laureate).get("firstname").getAsString();
+                                                }
 
-                                        String surname = "";
-                                        if(laureate_object.get("surname") != null){
-                                            surname = ((JsonObject) laureate).get("surname").getAsString();
+                                                String surname = "";
+                                                if(laureate_object.get("surname") != null){
+                                                    surname = ((JsonObject) laureate).get("surname").getAsString();
+                                                }
+                                                if(firstname != null && !TextUtils.isEmpty(firstname)){
+                                                    name.append(firstname);
+                                                }
+                                                if(surname != null && !TextUtils.isEmpty(surname)){
+                                                    name.append(" ");
+                                                    name.append(surname);
+                                                }
+                                                Log.d(TAG, "name " + name);
+                                                nobelPrizeInfo.award_winers.add(name.toString());
+                                                name.setLength(0);
+                                            }
+                                            nobelPrizeYearInfo.prize_info.add(nobelPrizeInfo);
+                                            laureates = null;
                                         }
-                                        if(firstname != null && !TextUtils.isEmpty(firstname)){
-                                            name.append(firstname);
+                                        if(mMaxCategoryCount < nobelPrizeYearInfo.prize_info.size()){
+                                            mMaxCategoryCount = nobelPrizeYearInfo.prize_info.size();
                                         }
-                                        if(surname != null && !TextUtils.isEmpty(surname)){
-                                            name.append(" ");
-                                            name.append(surname);
-                                        }
-                                        //Log.d(TAG, "name " + name);
-                                        nobelPrizeInfo.award_winers.add(name.toString());
-                                        name.setLength(0);
+                                        mNobelPrizeYearInfos.add(nobelPrizeYearInfo);
+                                        name = null;
                                     }
-                                    nobelPrizeYearInfo.prize_info.add(nobelPrizeInfo);
-                                    laureates = null;
-                                }
-                                if(mMaxCategoryCount < nobelPrizeYearInfo.prize_info.size()){
-                                    mMaxCategoryCount = nobelPrizeYearInfo.prize_info.size();
-                                }
-                                mNobelPrizeYearInfos.add(nobelPrizeYearInfo);
 
-                                if(++mCountPrizeInfos == yearCount){
+                                }
+
+                                Log.d(TAG, "mCountPrizeInfos " + mCountPrizeInfos);
+                                if(++mCountPrizeInfos == finalYearCount){
                                     //Log.d(TAG, "notifyDataSetChanged Count " + mNobelPrizeYearInfos.size());
                                     // Sort year informations
                                     Collections.sort(mNobelPrizeYearInfos, new Comparator<NobelPrizeYearInfo>() {
@@ -113,8 +141,10 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
                                     });
                                     // Notify get data done;
                                     notifyDataSetChanged();
+                                    mCountPrizeInfos = 0;
+                                    getNobelPrizeYearInfos(mRemainYearCount);
                                 }
-                                name = null;
+
                                 prizes = null;
                             }
                         }
@@ -152,7 +182,7 @@ public class NobelPrizeAdapter extends ArrayAdapter<NobelPrizeYearInfo> {
 
     @Override
     public int getViewTypeCount() {
-        return mMaxCategoryCount;
+        return 7;
     }
 
     @Override
